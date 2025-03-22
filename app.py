@@ -1,17 +1,17 @@
+import os
+import uuid
+import datetime
+import logging
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from gtts import gTTS
 import PyPDF2
 from PIL import Image
 import pytesseract
-import os
-import uuid
-import datetime
-import logging
-import bcrypt
 from sqlalchemy import create_engine, Column, Integer, String, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+import bcrypt
 from dotenv import load_dotenv
 
 app = Flask(__name__)
@@ -25,7 +25,6 @@ app.config['UPLOAD_FOLDER'] = 'static/audio'
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 # --- DATABASE SETUP ---
-
 # Configure your database URL from environment variables
 DATABASE_URL = os.getenv("DATABASE_URL")
 engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
@@ -214,4 +213,6 @@ def serve_audio(filename):
     return send_from_directory(os.path.join(app.root_path, 'static', 'audio'), filename)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    # Dynamic port for deployment (e.g., Render)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(debug=True, host="0.0.0.0", port=port)

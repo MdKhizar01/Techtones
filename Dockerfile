@@ -1,23 +1,25 @@
-# Use an official Python runtime as a parent image
-FROM python:3.9-slim-buster
+# Use official Python image as base
+FROM python:3.9-slim
 
 # Set the working directory in the container
 WORKDIR /app
 
-# Copy the requirements file into the container at /app
-COPY requirements.txt /app/requirements.txt
-
-# Install any needed packages specified in requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+# Install system dependencies required for Tesseract OCR
+RUN apt-get update && \
+    apt-get install -y tesseract-ocr && \
+    apt-get clean
 
 # Copy the current directory contents into the container at /app
-COPY . /app/
+COPY . /app
 
-# Make port 5000 available to the world outside this container
+# Install the required Python packages from requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Expose the port that the Flask app will run on
 EXPOSE 5000
 
-# Define environment variable
-ENV NAME=FlaskAPI
+# Set the environment variable for Flask to run in production mode
+ENV FLASK_ENV=production
 
-# Run app.py when the container launches
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app:app"]
+# Run the Flask app
+CMD ["python", "app.py"]
